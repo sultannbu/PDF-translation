@@ -1,5 +1,6 @@
 # ما هو برنامج مترجمي؟
-![GitHub release](https://img.shields.io/github/v/release/USERNAME/REPO)
+![Python](https://img.shields.io/badge/Python-3.10+-blue)
+
 
 
 برنامج مترجمي مصمم لترجمة ملفات PDF المصوره وخصيصاً الكتب  القديمة المصوّرة .
