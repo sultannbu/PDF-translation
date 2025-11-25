@@ -1,4 +1,27 @@
 # ما هو برنامج مترجمي؟
+.. image:: https://img.shields.io/pypi/pyversions/pytesseract.svg
+   :target: https://pypi.python.org/pypi/pytesseract
+   :alt: Python versions
+
+.. image:: 	https://img.shields.io/github/release/madmaze/pytesseract.svg
+   :target: https://github.com/madmaze/pytesseract/releases
+   :alt: Github release
+
+.. image:: https://img.shields.io/pypi/v/pytesseract.svg?color=blue
+   :target: https://pypi.python.org/pypi/pytesseract
+   :alt: PyPI release
+
+.. image:: https://img.shields.io/conda/vn/conda-forge/pytesseract.svg?color=blue
+   :target: https://anaconda.org/conda-forge/pytesseract
+   :alt: Conda release
+
+.. image:: https://results.pre-commit.ci/badge/github/madmaze/pytesseract/master.svg
+   :target: https://results.pre-commit.ci/latest/github/madmaze/pytesseract/master
+   :alt: Pre-commit CI status
+
+.. image:: https://github.com/madmaze/pytesseract/workflows/CI/badge.svg?branch=master
+    :target: https://github.com/madmaze/pytesseract/actions?query=workflow%3ACI
+    :alt: CI workflow status
 
 برنامج مترجمي مصمم لترجمة ملفات PDF المصوره وخصيصاً الكتب  القديمة المصوّرة .
 
