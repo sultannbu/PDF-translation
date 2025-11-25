@@ -50,7 +50,7 @@ https://github.com/UB-Mannheim/tesseract/wiki
     إذا ستكون على النحو التالي
     eng.traineddata
     وهذي قائمة اللغات المدعومه مع الرموز
-    '''bash
+    ```
         "الإنجليزية": "eng",
         "الصينية": "chi_sim",
         "الإسبانية": "spa",
@@ -70,7 +70,7 @@ https://github.com/UB-Mannheim/tesseract/wiki
         "التايلاندية": "tha",
         "الفارسية": "fas",
         "الفلبينية": "fil"
-    '''
+    ```
     بعد التحميل ضع ملف التدريب في المسار tesseract\tessdata
     ومن ثم شغل البرنامج من جديد ويمكنك الترجمة بواسطته 
 
