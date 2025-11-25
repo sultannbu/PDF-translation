@@ -1,5 +1,12 @@
 # ما هو برنامج مترجمي؟
 
-برنامج مترجمي مصمم لترجمة الكتب القديمة المصوّرة باستخدام الذكاء الاصطناعي.
+برنامج مترجمي مصمم لترجمة ملفات PDF المصوره وخصيصاً الكتب  القديمة المصوّرة .
 
-صنع وبرمج من قبل سلطان سامي
+#صور البرنامج
+<img src="imgs/teaser.jpg" width="1000px"/>
+<img src="imgs/teaser.jpg" width="1000px"/>
+<img src="imgs/teaser.jpg" width="1000px"/>
+<img src="imgs/teaser.jpg" width="1000px"/>
+
+# التحميل
+## Prerequisites
