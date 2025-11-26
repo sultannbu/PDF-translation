@@ -1,5 +1,4 @@
 arabic-reshaper
-bidi
 opencv-python
 deep-translator
 pymupdf

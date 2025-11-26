@@ -3,7 +3,7 @@ import pytesseract
 from pytesseract import Output
 from deep_translator import GoogleTranslator
 import arabic_reshaper
-from bidi.algorithm import get_display
+# from bidi.algorithm import get_display # REMOVED: Obsolete package
 import cv2
 from collections import Counter
 import fitz
@@ -75,7 +75,8 @@ def main():
         x,h,width,hieght = data_image[0]["bbox"][0],data_image[0]["bbox"][1],data_image[0]["bbox"][2],data_image[0]["bbox"][3]
             
         page = pdf.load_page(ia)
-        pix = page.get_pixmap(dpi=300)
+        DPI_value = int(data_config["DPI"][data_config["defult"]["DPI"]])
+        pix = page.get_pixmap(dpi=DPI_value)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
         img = img.convert("RGB")
         img = img.filter(ImageFilter.MedianFilter(size=3))
@@ -148,7 +149,10 @@ def main():
                 text_arabic1= " ".join(text_arabic1.split())
             except:
                 text_arabic1=0
-            text0=get_display(arabic_reshaper.reshape(text_arabic1))
+                
+            # FIX: Use arabic_reshaper directly
+            text0=arabic_reshaper.reshape(text_arabic1)
+
        #     print(f"""
                # ______________________________________
                # block is :{i}
@@ -360,7 +364,7 @@ def openai_send(text12,type_):
         api_key=data_config['defult']['keys']['openai'],)
             elif type_ == 2:
                 model = "deepseek-chat"
-                client = OpenAI(api_key=data_config['defult']['keys']['deebseek'],base_url="https://api.deepseek.com/v1") 
+                client = OpenAI(api_key=data_config['defult']['keys']['deepseek'],base_url="https://api.deepseek.com/v1") 
             response = client.chat.completions.create(model=model,
                 messages=[{"role": "system", "content": tester},{"role": "user", "content": f"{text12}"}],temperature=0.2)
     
