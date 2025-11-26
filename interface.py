@@ -8,7 +8,8 @@ import json,math
 #import mtrgm
 import tkinter as tk
 import arabic_reshaper
-from bidi.algorithm import get_display
+# NOTE: 'from bidi.algorithm import get_display' was removed.
+# The display now relies solely on arabic_reshaper and customtkinter's text direction settings.
 from PIL import Image,ImageDraw
 import translte
 
@@ -36,9 +37,23 @@ class main():
         self.frame.geometry("680x350")
         self.frame.title("مترجمي")
         self.frame.resizable(False,False)
-        icon =tk.PhotoImage(file =self.file1/ "lib\photo\pdf.png")
-        self.frame.iconphoto(True,icon)
-        self.frame.iconbitmap( rf"{self.file1}\lib\photo\pdf.ico")
+        # Assuming the lib/photo path structure for consistency
+        icon_path = self.file1 / "lib" / "photo" / "pdf.png"
+        icon_ico_path = self.file1 / "lib" / "photo" / "pdf.ico"
+        
+        try:
+            icon = tk.PhotoImage(file=icon_path)
+            self.frame.iconphoto(True, icon)
+        except tk.TclError:
+             # Fallback if tkinter cannot handle the file type or path
+             print(f"Warning: Could not set PNG icon from {icon_path}")
+        
+        try:
+            # Note: iconbitmap path needs to be absolute and may fail on Mac/Linux
+            self.frame.iconbitmap(icon_ico_path)
+        except Exception:
+             pass 
+
         buttun_file = ctk.CTkButton(self.frame,text="اختر الملف" ,command=self.select_file, font=self.font, fg_color=data["fg_color"], hover_color=data["hover_color"])
         buttun_file.place(x=180,y=10)
         
@@ -63,21 +78,29 @@ class main():
 
 
         ### frame before and after
+        
+        # Paths corrected to use Pathlib and avoid hardcoded Windows paths
+        default_img_path = self.file1 / "lib" / "photo" / "pdf.png"
 
         before= ctk.CTkFrame(self.frame,corner_radius=10  )
         before.place(x=300,y= 80 )
         ctk.CTkLabel(before,text="قبل",font=self.font).pack()
-        photo = ctk.CTkImage(Image.open(r"C:\Users\MST\Desktop\projects\translte\pdf.png"),size=(150,150))
+        # Fallback image loading in case the hardcoded path from the original source is wrong:
+        try:
+            photo = ctk.CTkImage(Image.open(default_img_path),size=(150,150))
+        except FileNotFoundError:
+            # Use a simple placeholder if the default image doesn't exist
+            placeholder_img = Image.new('RGB', (150, 150), color = 'gray')
+            ImageDraw.Draw(placeholder_img).text((10, 70), "No Image", fill=(0, 0, 0))
+            photo = ctk.CTkImage(placeholder_img, size=(150, 150))
+
         self.before = ctk.CTkLabel(before,image=photo,text="")
         self.before.pack(pady=20)
-
-
 
 
         after= ctk.CTkFrame(self.frame,corner_radius=10  )
         after.place(x=40,y= 80)
         ctk.CTkLabel(after,text="بعد",font=self.font).pack()
-        photo = ctk.CTkImage(Image.open(r"C:\Users\MST\Desktop\projects\translte\pdf.png"),size=(150,150))
         self.after =ctk.CTkLabel(after,image=photo,font=self.font,text="")
         self.after.pack(pady=20)
 
@@ -91,9 +114,13 @@ class main():
 
 
 
-        # تعيين الأيقونة في شريط المهام (Windows)
-        myappid = 'MyCompany.MyTranslator.1.0'  # اسم تعريفي للتطبيق
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        # تعيين الأيقونة في شريط المهام (Windows) - ONLY APPLICABLE TO WINDOWS
+        try:
+            myappid = 'MyCompany.MyTranslator.1.0'  # اسم تعريفي للتطبيق
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        except Exception:
+            # Pass silently on non-Windows systems (Mac/Linux)
+            pass 
 
 
 
@@ -119,8 +146,7 @@ class main():
         frame_menu.place(x=500,y= 90)
 
 
-
-
+        # Lang menu
         label_but = ctk.CTkLabel(frame_menu,text=" لغة الملف", font=self.font)
         label_but.grid(row=0,column=0)
         global lang
@@ -128,7 +154,7 @@ class main():
         self.lang.grid(row=1,column=0)
         self.lang.configure(command=self.update_defulte)
 
-
+        # Type menu
         label_but = ctk.CTkLabel(frame_menu,text=" نوع الكتاب", font=self.font)
         label_but.grid(row=2,column=0)
         global type1
@@ -137,7 +163,7 @@ class main():
         self.type1.configure(command=self.update_defulte)
 
 
-
+        # Translator menu
         label_but = ctk.CTkLabel(frame_menu,text="المترجم", font=self.font)
         label_but.grid(row=4,column=0)
         self.translter = ctk.CTkOptionMenu(frame_menu,values=list(data["translter"].keys()), font=self.font, fg_color=data["fg_color"])
@@ -182,101 +208,17 @@ class main():
         self.clear_json(data)
     
     def infromition(self):
-        pass
-    def select_file(self):
-        if self.status == 1:
-            self.wrong("اطفى عملية الترجمة اولاً")
-            return
-        f = filedialog.askopenfilename(title="اختر ملف الPdf",filetypes=[("Only PDF","*.pdf")])
-     #   print(f)           
-        name=f.split("/",99)[-1]
-        path = f
-      #  print(f"""
-       #     name file is {name}  and path is {path}""")
-        data["target_file"]= name 
-        data["target_path"]= path
-        if path != "":
-            self.label_file.configure(text=f"{name} اسم الملف المترجم ")
-        else:
-            self.label_file.configure(text=f"")
-        
-        
-        
-        self.update_file()
-        
-    def update_file(self):
-        with open(rf"{self.json_data}", "w", encoding="utf-8") as data_file:
-            json.dump(data, data_file, ensure_ascii=False, indent=4)
-    def run(self):
-        if data["target_path"] == "":
-            self.wrong("لم تختر اي ملف للترجمة ")
-            return 
-        a = self.check_lang(data["lang"][data["defult"]["lang"]])
-        if a == 0:
-            self.wrong("  لغة الترجمة غير متوفره يرجى تحميلها او مراجعة التعليمات   ")
-            return
-        if self.status == 0:
-            self.status= 1
-            data["status"] = 1
-            self.clear_json(data)
-            self.buttun_run.configure(text="إيقاف عملية الترجمة")
-            
-            self.run2 =threading.Thread(target=translte.main)
-            self.run2.start()
-
-        #   self.run2.join()
-            
-            self.bar_f.after(3000,self.update_bar)
-
-        elif self.status == 1:
-            
-            data["status"] = 0
-            self.buttun_run.configure(text="تشغيل")
-            self.status= 0
-            self.clear_json(data)
-
-
-
-
-    def zoom(self):
-        self.status_zoom = 1
-        self.zoom_frame = ctk.CTkToplevel(self.frame)   
-        self.zoom_frame.title("الصور مكبره") 
-        self.zoom_frame.geometry("1100x600")
-      #  self.zoom_frame.grab_set()
-       # self.zoom_frame.overrideredirect(True)
-       
-       
-       
-        path_after = self.file / f"lib/photo/after.png"
-        path_before =  self.file / f"lib/photo/before.png"
-        path_loding =  self.file / f"lib/photo/loading.png"
-             
-        
-        before= ctk.CTkFrame(self.zoom_frame,corner_radius=10  )
-        before.place(x=550,y= 20 )
-        ctk.CTkLabel(before,text="قبل",font=self.font).pack()
-        photo = ctk.CTkImage(Image.open(rf"{path_loding}"),size=(500,500)) 
-        self.before_zoom = ctk.CTkLabel(before,image=photo,text="")
-        self.before_zoom.pack(pady=0)
-
-
-
-        after= ctk.CTkFrame(self.zoom_frame,corner_radius=10  )
-        after.place(x=10,y= 20)
-        ctk.CTkLabel(after,text="بعد",font=self.font).pack()
-        photo = ctk.CTkImage(Image.open(rf"{path_loding}"),size=(500,500)) 
-        self.after_zoom =ctk.CTkLabel(after,image=photo,font=self.font,text="")
-        self.after_zoom.pack(pady=0)
-
-        
-        
-    def infromation(self):
         infromation = ctk.CTkToplevel(self.frame)   
         infromation.title("التعليمات") 
         infromation.geometry("600x500")
-      #  self.zoom_frame.grab_set()
-       # self.zoom_frame.overrideredirect(True)
+        infromation.resizable(False,False)
+        
+        icon_ico_path = self.file1 / "lib" / "photo" / "pdf.ico"
+        try:
+             infromation.wm_iconbitmap(icon_ico_path)
+        except Exception:
+             pass 
+
         text="""
                
 برنامج "مترجمي"
@@ -354,8 +296,100 @@ ____________________________________________________________________________
         box = ctk.CTkTextbox(infromation,width=600,height=500)
         box.pack(fill="both", expand=True)
         box.tag_config("right", justify="right")
-        box.insert("1.0",get_display(arabic_reshaper.reshape(text)), "right")
+        
+        # The fix: use arabic_reshaper directly, removing bidi dependency
+        reshaped_text = arabic_reshaper.reshape(text)
+        box.insert("1.0", reshaped_text, "right") 
+        
         box.configure(font =self.font,state="disabled")
+    def select_file(self):
+        if self.status == 1:
+            self.wrong("اطفى عملية الترجمة اولاً")
+            return
+        f = filedialog.askopenfilename(title="اختر ملف الPdf",filetypes=[("Only PDF","*.pdf")])
+     #   print(f)           
+        name=f.split("/",99)[-1]
+        path = f
+      #  print(f"""
+       #     name file is {name}  and path is {path}""")
+        data["target_file"]= name 
+        data["target_path"]= path
+        if path != "":
+            self.label_file.configure(text=f"{name} اسم الملف المترجم ")
+        else:
+            self.label_file.configure(text=f"")
+        
+        
+        
+        self.update_file()
+        
+    def update_file(self):
+        with open(rf"{self.json_data}", "w", encoding="utf-8") as data_file:
+            json.dump(data, data_file, ensure_ascii=False, indent=4)
+    def run(self):
+        if data["target_path"] == "":
+            self.wrong("لم تختر اي ملف للترجمة ")
+            return 
+        a = self.check_lang(data["lang"][data["defult"]["lang"]])
+        if a == 0:
+            self.wrong("  لغة الترجمة غير متوفره يرجى تحميلها او مراجعة التعليمات   ")
+            return
+        if self.status == 0:
+            self.status= 1
+            data["status"] = 1
+            self.clear_json(data)
+            self.buttun_run.configure(text="إيقاف عملية الترجمة")
+            
+            self.run2 =threading.Thread(target=translte.main)
+            self.run2.start()
+
+        #   self.run2.join()
+            
+            self.bar_f.after(3000,self.update_bar)
+
+        elif self.status == 1:
+            
+            data["status"] = 0
+            self.buttun_run.configure(text="تشغيل")
+            self.status= 0
+            self.clear_json(data)
+
+
+
+
+    def zoom(self):
+        self.status_zoom = 1
+        self.zoom_frame = ctk.CTkToplevel(self.frame)   
+        self.zoom_frame.title("الصور مكبره") 
+        self.zoom_frame.geometry("1100x600")
+      #  self.zoom_frame.grab_set()
+       # self.zoom_frame.overrideredirect(True)
+       
+       
+        # Pathlib correction applied here
+        path_after = self.file / "lib" / "photo" / "after.png"
+        path_before =  self.file / "lib" / "photo" / "before.png"
+        path_loding =  self.file / "lib" / "photo" / "loading.png"
+             
+        
+        before= ctk.CTkFrame(self.zoom_frame,corner_radius=10  )
+        before.place(x=550,y= 20 )
+        ctk.CTkLabel(before,text="قبل",font=self.font).pack()
+        photo = ctk.CTkImage(Image.open(path_loding),size=(500,500)) 
+        self.before_zoom = ctk.CTkLabel(before,image=photo,text="")
+        self.before_zoom.pack(pady=0)
+
+
+
+        after= ctk.CTkFrame(self.zoom_frame,corner_radius=10  )
+        after.place(x=10,y= 20)
+        ctk.CTkLabel(after,text="بعد",font=self.font).pack()
+        photo = ctk.CTkImage(Image.open(path_loding),size=(500,500)) 
+        self.after_zoom =ctk.CTkLabel(after,image=photo,font=self.font,text="")
+        self.after_zoom.pack(pady=0)
+
+        
+        
     def wrong(self,text):
     
      #   print(self.frame.winfo_x())
@@ -369,8 +403,13 @@ ____________________________________________________________________________
         y = self.frame.winfo_y() + (self.frame.winfo_height() - self.wrong_frame.winfo_height()) // 2
         self.wrong_frame.geometry(f"+{x}+{y}")
         self.wrong_frame.resizable(False,False)
-        self.wrong_frame.anchor("center")
-        self.wrong_frame.iconbitmap( rf"{self.file1}\lib\photo\pdf.ico")
+        
+        icon_ico_path = self.file1 / "lib" / "photo" / "pdf.ico"
+        try:
+             self.wrong_frame.iconbitmap(icon_ico_path)
+        except Exception:
+             pass 
+             
         label = ctk.CTkLabel(self.wrong_frame,text=text,font=self.font).pack()
         self.wrong_frame.after(1000,self.wrong_frame.destroy)
 
@@ -383,10 +422,10 @@ ____________________________________________________________________________
         with open(rf"{self.json_data}", "w", encoding="utf-8") as data_file:
             json.dump(data2, data_file, ensure_ascii=False, indent=4)
     def check_lang(self,lang):
-        path = data['path'].split("\\")[:-1]
-        path = "\\".join(path)
-        path = f"{path}\\tessdata\\{lang}.traineddata"
-      #  print(path)
+        # Pathlib correction applied here
+        path_parts = data['path'].split("\\")[:-1]
+        path = Path(*path_parts) / "tessdata" / f"{lang}.traineddata"
+        
         try:
             with open(path,"r")as a:
                 return 1
@@ -420,8 +459,13 @@ ____________________________________________________________________________
         self.Setting.geometry("680x350")
         self.Setting.grab_set()
         self.Setting.resizable(False,False)
-        self.Setting.wm_iconbitmap( rf"{self.file1}\lib\photo\pdf.ico")
         
+        icon_ico_path = self.file1 / "lib" / "photo" / "pdf.ico"
+        try:
+             self.Setting.wm_iconbitmap(icon_ico_path)
+        except Exception:
+             pass 
+
         frame_menu1= ctk.CTkFrame(self.Setting,corner_radius=10)
         frame_menu1.place(x=10,y= 20)
         ctk.CTkLabel(frame_menu1,text="الفلترة",font=self.font).pack()
@@ -531,22 +575,25 @@ ____________________________________________________________________________
             self.bar.set(dataa['bar'])
             
             
-            path_after = self.file / f"lib/photo/after.png"
-            path_before =  self.file / f"lib/photo/before.png"
-            path_loding =  self.file / f"lib/photo/loading.png"
+            path_after = self.file / "lib" / "photo" / "after.png"
+            path_before =  self.file / "lib" / "photo" / "before.png"
+            path_loding =  self.file / "lib" / "photo" / "loading.png"
+            
+            
+            # Using Pathlib for paths
             try:
-                photo_after = ctk.CTkImage(Image.open(rf"{path_after}"),size=(150,150)) 
+                photo_after = ctk.CTkImage(Image.open(path_after),size=(150,150)) 
                 self.after.configure(image=photo_after)
             except:
-                photo_after = ctk.CTkImage(Image.open(rf"{path_loding}"),size=(150,150)) 
+                photo_after = ctk.CTkImage(Image.open(path_loding),size=(150,150)) 
                 self.after.configure(image=photo_after)
             
             
             try:
-                photo_before = ctk.CTkImage(Image.open(rf"{path_before}"),size=(150,150)) 
+                photo_before = ctk.CTkImage(Image.open(path_before),size=(150,150)) 
                 self.before.configure(image=photo_before)
             except:
-                photo_before = ctk.CTkImage(Image.open(rf"{path_loding}"),size=(150,150)) 
+                photo_before = ctk.CTkImage(Image.open(path_loding),size=(150,150)) 
                 self.before.configure(image=photo_before)
             
             try:
@@ -558,18 +605,18 @@ ____________________________________________________________________________
                 try:
                     
                         
-                    photo_after = ctk.CTkImage(Image.open(rf"{path_after}"),size=(500,500)) 
+                    photo_after = ctk.CTkImage(Image.open(path_after),size=(500,500)) 
                     self.after_zoom.configure(image=photo_after)
                         
-                    photo_before = ctk.CTkImage(Image.open(rf"{path_before}"),size=(500,500)) 
+                    photo_before = ctk.CTkImage(Image.open(path_before),size=(500,500)) 
                     self.before_zoom.configure(image=photo_before)
                     
                 except:
                     try:
-                        photo_after = ctk.CTkImage(Image.open(rf"{path_loding}"),size=(500,500)) 
+                        photo_after = ctk.CTkImage(Image.open(path_loding),size=(500,500)) 
                         self.after_zoom.configure(image=photo_after)
                             
-                        photo_before = ctk.CTkImage(Image.open(rf"{path_loding}"),size=(500,500)) 
+                        photo_before = ctk.CTkImage(Image.open(path_loding),size=(500,500)) 
                         self.before_zoom.configure(image=photo_before)
                     except:
                         pass
@@ -596,89 +643,5 @@ ____________________________________________________________________________
         self.frame.after(100, self.update_settings1)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == "__main__":
     app = main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
