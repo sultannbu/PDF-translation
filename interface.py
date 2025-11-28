@@ -10,7 +10,7 @@ import tkinter as tk
 import arabic_reshaper
 from bidi.algorithm import get_display
 from PIL import Image,ImageDraw
-import translte
+
 
 class main(): 
     global data
@@ -66,8 +66,8 @@ class main():
 
         before= ctk.CTkFrame(self.frame,corner_radius=10  )
         before.place(x=300,y= 80 )
-        ctk.CTkLabel(before,text="قبل",font=self.font).pack()
-        photo = ctk.CTkImage(Image.open(r"C:\Users\MST\Desktop\projects\translte\pdf.png"),size=(150,150))
+        ctk.CTkLabel(before,text="قبل",font=self.font).pack() 
+        photo = ctk.CTkImage(Image.open( rf"{self.file1}\lib\photo\pdf.png"),size=(150,150))
         self.before = ctk.CTkLabel(before,image=photo,text="")
         self.before.pack(pady=20)
 
@@ -77,7 +77,7 @@ class main():
         after= ctk.CTkFrame(self.frame,corner_radius=10  )
         after.place(x=40,y= 80)
         ctk.CTkLabel(after,text="بعد",font=self.font).pack()
-        photo = ctk.CTkImage(Image.open(r"C:\Users\MST\Desktop\projects\translte\pdf.png"),size=(150,150))
+        photo = ctk.CTkImage(Image.open(rf"{self.file1}\lib\photo\pdf.png"),size=(150,150))
         self.after =ctk.CTkLabel(after,image=photo,font=self.font,text="")
         self.after.pack(pady=20)
 
