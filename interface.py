@@ -1,10 +1,10 @@
 import customtkinter as ctk
 from tkinter import filedialog
 import threading
-import time
+
 from pathlib import Path
 import ctypes
-import json,math
+import json
 #import mtrgm
 import tkinter as tk
 import arabic_reshaper
@@ -350,7 +350,19 @@ ____________________________________________________________________________
  عند ضبط الحساسية على ثلاثين يقوم البرنامج
 
 بحذف أي جملة تحتوي على أكثر من "ثلاثين" رموز غير عربية أو نصوص مشوهة.
-الهدف هو تحسين دقة الترجمة النهائية وجعلها أكثر وضوحاً."""
+الهدف هو تحسين دقة الترجمة النهائية وجعلها أكثر وضوحاً.
+____________________________________________________________________________
+معلومات عن البرنامج
+
+"مطور البرنامج"
+سلطان سامي
+
+"مدة العمل"
+شهرين
+
+"رابط البرنامج لتلقي اخر التحديثات"
+https://github.com/sultannbu/MyTranslator-PDF-translation
+"""
         box = ctk.CTkTextbox(infromation,width=600,height=500)
         box.pack(fill="both", expand=True)
         box.tag_config("right", justify="right")

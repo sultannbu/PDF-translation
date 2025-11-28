@@ -5,14 +5,13 @@ from deep_translator import GoogleTranslator
 import arabic_reshaper
 from bidi.algorithm import get_display
 import cv2
-from collections import Counter
 import fitz
-import img2pdf
+
 from pathlib import Path
 #import translators as ts
 from openai import OpenAI
 import numpy as np
-import json,time
+import json
 global data
 file = Path(__file__).parent
 
@@ -131,7 +130,7 @@ def main():
                 coordinates["conf"] = max(coordinates["conf"],s["conf"])
                 gmlh += s["text"]+ " "
             
-            coor_top=coordinates["min_top"]
+            
             #print(gmlh)
             type_translete = data_config['translter'][data_config['defult']['translter']]
             text_arabic1 = transleter(type_translete,gmlh)
@@ -181,6 +180,7 @@ def main():
                     
                     
                 font = ImageFont.truetype("arial.ttf",good_size)
+                print("good size" +str(good_size))
                 status_block = 0
                 if (MAX_Y< 120):
 
@@ -206,14 +206,16 @@ def main():
             ###################################################
             # هذا المربع يختص في ترتيب الكلام وكتابته على الصورة
             #   
+                coor_top=MIN_Y
                 length_text_last=0
                 coor = MAX_X
                 for text in text0.split(" ")[::-1]:
                         if status_block == 1:
                             text_arabic= "".join(text.split())
                             length_text = font.getlength(text_arabic) 
-                            if coor <= (MIN_X+(length_text*0.9)):
-                                coor_top = (coor_top + MAX_H +MIN_H)
+                            if coor <= (MIN_X+(length_text)):
+                                print(" tm t3de 7dod")
+                                coor_top = (coor_top + MAX_H + MIN_H)
                                 coor = MAX_X-length_text
                                 length_text_last = length_text
                             else:
@@ -249,7 +251,7 @@ def main():
                 newpage.insert_image(rect_image,filename=rf"{file}\lib\photo\last_translete.jpg")
                 file_pdf.saveIncr()
                 file_pdf.close()
-                
+
        
 
 
@@ -322,32 +324,52 @@ def Filter(text,block,font_size):
     #    return False
     
     return True
-def get_good_size_text(text_arabic,block):
+def get_good_size_text(text_arabic,block,again = False):
     size = block["MAX_H"]
-    for X in range(3):
-        length_text_last=0
+    length_text_last = 0
+
+    
+
+    
+    for _ in range(30):
+        print(_)
         coor_top=block["MIN_Y"]
         coor = block["MAX_X"]
+
+        print(f"""
+          start size {size}
+         start min {block["MIN_Y"]}
+         start max {block["MAX_Y"]}
+         start coor {coor}
+         start top {coor_top}
+         """)
+
+        
         for text in text_arabic.split(" "):
             font = ImageFont.truetype("arial.ttf",size)
 
-            text_arabic= "".join(text.split())
-            length_text = font.getlength(text_arabic) 
-            if coor <= (block["MIN_X"]+(length_text*0.9)):
-                                        
-                coor_top = (coor_top + block["MAX_H"] +block["MIN_H"])
+
+            length_text = font.getlength(text) 
+
+            if coor <= (block["MIN_X"]+(length_text)):
+                
+                print(" tm t3de 7dod")
+                coor_top = ((coor_top + block["MAX_H"]) + block["MIN_H"])
                 coor = block["MAX_X"]-length_text
                 length_text_last=length_text
             else:
                 coor  = coor - length_text  - (length_text_last /4)
                 length_text_last = length_text
 
-        if  coor_top >= block["MIN_Y"]:
+        if  coor_top > block["MAX_Y"]:
          #   print("تم تنفيذ الشرط")
-            size = size - (size/7)
-            X = X-1
+            size = size - (size/10)
         else:
             break
+    print(f"""
+         end size {size}
+         end coor_top {coor_top}""")
+
     return size
 
 def openai_send(text12,type_):
